@@ -1,38 +1,60 @@
-.App {
-  text-align: center;
+.chatbox{ 
+  border: 2px solid #74BDE0;
+  border-radius: 15px;
+  margin: 5px 0px;
+  padding: 13px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  background-color: #74BDE0;
+  font-family: 'Open Sans', sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.me.chatbox{
+  background-color: #fff;
+  font-family: 'Open Sans', sans-serif;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.container{
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-family: 'Open Sans', sans-serif;
+  margin-left: 3%;
 }
 
-.App-link {
-  color: #61dafb;
-}
+.container.me{
+  display: flex;
+  flex-direction: row-reverse;
+  font-family: 'Open Sans', sans-serif;
+  margin-right: 3%;
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+}
+.btm{
+  position: fixed;
+  width: 90%;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  margin-left: 3%;
+  margin-bottom: 10px;
+  background-color: aliceblue;
+}
+.btm input{
+font-family: 'Open Sans', sans-serif;
+font-size: medium;
+background-color: #fff;
+
+}
+.btm button{
+  margin-left: 3%;
+  padding: 17px 15px;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+  font-size: medium;
+
+}
+.chat-container{
+  height: 70vh;
+  overflow-y: scroll;
+  background-color: #FFF;
+
+
 }
