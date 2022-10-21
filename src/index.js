@@ -1,30 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './firebase';
+import Routes from './Routes';
+import {  BrowserRouter as Router } from 'react-router-dom';
+import { persistor, store } from './redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCvupajRh0j_63qQUUyBJmcnlEayKT3cCM",
-  authDomain: "chat-app-6e0e6.firebaseapp.com",
-  projectId: "chat-app-6e0e6",
-  storageBucket: "chat-app-6e0e6.appspot.com",
-  messagingSenderId: "33904656688",
-  appId: "1:33904656688:web:5fb69393e88773aec9c8f5"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+  <PersistGate loading={<>loading</>} persistor={persistor}>
+     <Router>
+     <Routes />
+     </Router>
+     </PersistGate>
+     </Provider>
   </React.StrictMode>
 );
 

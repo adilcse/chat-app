@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import { Stack } from '@mui/system';
 import { getDatabase, push, ref, set,onChildAdded } from "firebase/database";
 import { GoogleAuthProvider, getAuth, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { useSelector } from 'react-redux';
 
 // import { db } from './firebase';
 
@@ -19,32 +20,32 @@ const App = () => {
 
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
-  const [user, setUser] = useState({name: "", email: ""});
+  // const [user, setUser] = useState({name: "", email: ""});
   const [chats, setChats] = useState([]);
   const [msg, setMsg] = useState('');
+  const {user} = useSelector(state => state.AppReducer);
+  // const googleLogin = () =>{
+  //   signInWithPopup(auth, provider)
+  // .then((result) => {
+  //   // This gives you a Google Access Token. You can use it to access the Google API.
+  //   const credential = GoogleAuthProvider.credentialFromResult(result);
+  //   const token = credential.accessToken;
+  //   // The signed-in user info.
+  //   const user = result.user;
+  //   setUser({name:user.displayName, email: user.email})
+  //   console.log(token, user);
 
-  const googleLogin = () =>{
-    signInWithPopup(auth, provider)
-  .then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-    // The signed-in user info.
-    const user = result.user;
-    setUser({name:user.displayName, email: user.email})
-    console.log(token, user);
-
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.email;
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
-  }
+  // }).catch((error) => {
+  //   // Handle Errors here.
+  //   const errorCode = error.code;
+  //   const errorMessage = error.message;
+  //   // The email of the user's account used.
+  //   const email = error.email;
+  //   // The AuthCredential type that was used.
+  //   const credential = GoogleAuthProvider.credentialFromError(error);
+  //   // ...
+  // });
+  // }
 
   const db = getDatabase();
   const chatListRef = ref(db, 'chats');
@@ -62,7 +63,7 @@ const App = () => {
     let resp = () => {};
     if (user?.email) {
       resp = onChildAdded(chatListRef, (data) => {
-        console.log(data.val())
+        // console.log(data.val())
         setChats(chats=>[...chats,data.val()])
         setTimeout(()=>{
           updateHeight()
@@ -74,20 +75,20 @@ const App = () => {
   return resp
   },[user]);
 
-  useEffect(()=> {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser({name:user.displayName, email: user.email})
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-        // ...
-      } else {
-        // User is signed out
-        // ...
-      }
-    });
-  },[]);
+  // useEffect(()=> {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUser({name:user.displayName, email: user.email})
+  //       // User is signed in, see docs for a list of available properties
+  //       // https://firebase.google.com/docs/reference/js/firebase.User
+  //       const uid = user.uid;
+  //       // ...
+  //     } else {
+  //       // User is signed out
+  //       // ...
+  //     }
+  //   });
+  // },[]);
 
   const sendChat = () => {
 
@@ -108,14 +109,13 @@ const App = () => {
   
   return (
     <Stack>
-
       <Stack>
         <AppBar position="static">
           <Toolbar variant="dense">
             <Typography variant="h6" color="inherit" component="div">
               Chatu
             </Typography>
-            {user.email? null: <div>
+            {/* {user.email? null: <div>
         <input
           type="text"
           placeholder="Enter user to start"
@@ -125,7 +125,7 @@ const App = () => {
         <Button onClick={e=>{googleLogin()}} sx={{width: "max-content"}} variant="contained"  sendIcon={<SendIcon />}> Login</Button>
 
         </Stack>
-      </div>}     
+      </div>}      */}
           </Toolbar>
         </AppBar>
       </Stack>
@@ -160,7 +160,7 @@ const App = () => {
                 placeholder="Say something...."
             />
         </Paper>
-      <Button sx={{fonSize: 20}} onClick={(e) => sendChat()} variant="contained"  sendIcon={<SendIcon />}> 🕊️</Button>
+      <Button sx={{fonSize: 20}} onClick={(e) => sendChat()} variant="contained" endIcon={<SendIcon />}> 🕊️</Button>
 
       </div>
       </div> : null}
