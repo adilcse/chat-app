@@ -1,7 +1,7 @@
-import { Avatar, Typography } from "@mui/material";
+import { Avatar, Fab, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React  from "react";
-import {  useSelector } from "react-redux";
+import React, { useState }  from "react";
+import {  useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -11,10 +11,17 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreIcon from '@mui/icons-material/MoreVert';
-
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { getUsersList } from "../firestoreHelper";
+import { updateUsersListAction } from "../redux/action/Action";
+const rotate = {
+  transform: 'rotate(360deg)', 
+  transition: 'transform 500ms ease', // smooth transition
+ }
 const UsersList = () => {
-  const {  user: me, userList  } = useSelector((state) => state.AppReducer);
-
+  const {  user: me, userList, isLoggedIn  } = useSelector((state) => state.AppReducer);
+  const [refreshing, setRefreshing] = useState(false)
+  const dispatch = useDispatch();
   const StyledToolbar = styled(Toolbar)(({ theme }) => ({
     alignItems: 'flex-start',
     paddingTop: theme.spacing(1),
@@ -26,6 +33,17 @@ const UsersList = () => {
     },
   }));
 
+  const refresh = () => {
+    if (isLoggedIn) {
+      setRefreshing(true);
+      getUsersList().then((u) => {
+      setRefreshing(false);
+        dispatch(updateUsersListAction(u))
+      }).catch((e) => {
+      setRefreshing(false);
+      });
+    }
+  }
   return (
     <Stack>
       <Stack>
@@ -79,7 +97,7 @@ const UsersList = () => {
             .filter((u) => u.id !== me.id)
             .map((user) => {
               return (
-                <Link to={"/chat/"+user.id}>
+                <Link key={user.id} to={"/chat/"+user.id}>
                 <Stack
                   sx={{
                     width: "100%",
@@ -108,6 +126,13 @@ const UsersList = () => {
                 </Link>
               );
             })}
+          <Fab onClick={refresh} color="primary" aria-label="Refresh" sx={{ 
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            }}>
+            <RefreshIcon style={refreshing ? rotate : {}} />
+          </Fab>
         </Stack>
     </Stack>
 
