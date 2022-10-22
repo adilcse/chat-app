@@ -1,4 +1,4 @@
-import { LOGIN, LOGOUT } from "../constants"
+import { LOGIN, LOGOUT, UPDATE_USER_LIST } from "../constants"
 
 const defaultState = {
     user: {
@@ -6,8 +6,10 @@ const defaultState = {
         email: "",
         id: "",
         image: "",
-        token: "token"
+        token: "token",
+        createdAt: {}
     },
+    userList: [],
     isLoggedIn: false
 }
 const AppReducer = (state=defaultState, action={}) => {
@@ -23,6 +25,11 @@ const AppReducer = (state=defaultState, action={}) => {
                     ...state,
                     isLoggedIn: false,
                     user: defaultState.user
+                }
+            case UPDATE_USER_LIST:
+                return {
+                    ...state,
+                    userList: action.payload,
                 }
         default:
             return {...state}

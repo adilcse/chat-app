@@ -8,9 +8,11 @@ import {
   } from "react-router-dom";
 import App from './App'
 import { RequireAuth } from './components/RequireAuth';
+import { getUsersList } from './firestoreHelper';
 import Login from './pages/Login'
+import { UserChat } from './pages/UserChat';
 import UsersList from './pages/UsersList';
-import { LoginAction, LoginOutAction } from './redux/action/Action';
+import { LoginAction, LoginOutAction, updateUsersListAction } from './redux/action/Action';
 
 const Routes = () => {
   const auth = getAuth();
@@ -20,7 +22,6 @@ const Routes = () => {
     useEffect(()=> {
         return onAuthStateChanged(auth, (user) => {
           if (user && !isLoggedIn) {
-            console.log(user)
             dispatch(LoginAction({
                 name: user.displayName,
                 email: user.email,
@@ -32,12 +33,20 @@ const Routes = () => {
           }
         });
       },[]);
+    
       useEffect(()=> {
         const id = setTimeout(()=> {
             setIsLoading(false);
        }, 2000);
        return () => clearTimeout(id)
       }, []);
+      useEffect(() => {
+        if (isLoggedIn) {
+          getUsersList().then((u) => {
+            dispatch(updateUsersListAction(u))
+          });
+        }
+      }, [isLoggedIn]);
     if (isLoading) {
         return <CircularProgress />
     }
@@ -51,9 +60,19 @@ const Routes = () => {
                 <UsersList/>
             </RequireAuth>
         </Route>
-        <Route exact path="/">
+        <Route path="/chat/:uid">
+            <RequireAuth>
+                <UserChat/>
+            </RequireAuth>
+        </Route>
+        <Route exact path="/asif">
         <RequireAuth>
             <App/>
+        </RequireAuth>
+        </Route>
+        <Route exact path="/">
+        <RequireAuth>
+            <UsersList/>
         </RequireAuth>
         </Route>
     </Switch>
