@@ -1,8 +1,7 @@
-import { Avatar, Fab, Typography } from "@mui/material";
+import { Divider, Fab, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useState }  from "react";
+import React, { useMemo, useState }  from "react";
 import {  useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -10,19 +9,22 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import MoreIcon from '@mui/icons-material/MoreVert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { getUsersList } from "../firestoreHelper";
 import { updateUsersListAction } from "../redux/action/Action";
 import UserProfileMenu from "../components/UserProfileMenu";
+import AllUsersList from "../components/AllUsersList";
+import RecentChatsList from "../components/RecentChatsList";
+import useWindowSize from "../hooks/useWindowSize";
 const rotate = {
   transform: 'rotate(360deg)', 
   transition: 'transform 500ms ease', // smooth transition
  }
 const UsersList = () => {
-  const {  user: me, userList, isLoggedIn  } = useSelector((state) => state.AppReducer);
+  const {  user: me, userList, isLoggedIn, recentMessages  } = useSelector((state) => state.AppReducer);
   const [refreshing, setRefreshing] = useState(false)
   const dispatch = useDispatch();
+  const [width, height] = useWindowSize();
   const StyledToolbar = styled(Toolbar)(({ theme }) => ({
     alignItems: 'flex-start',
     paddingTop: theme.spacing(1),
@@ -44,6 +46,7 @@ const UsersList = () => {
       });
     }
   }
+  const userListWithoutMe = useMemo(() => userList.filter(u => u.id !== me.id), [userList, me])
   return (
     <Stack>
       <Stack>
@@ -74,58 +77,21 @@ const UsersList = () => {
           </AppBar>
         </Box>
       </Stack>
-        <Stack
-          direction="column"
-          sx={{
-            width: "100%",
-            mx: "auto",
-            borderRadius: "5px",
-            height: "100%",
-            justifyContent: "center",
-            maxWidth: "500px",
-          }}
-        >
-          {userList
-            .filter((u) => u.id !== me.id)
-            .map((user) => {
-              return (
-                <Link key={user.id} to={"/chat/"+user.id}>
-                <Stack
-                  sx={{
-                    width: "100%",
-                    height: "80px",
-                    alignItems: "center",
-                    borderBottom: "1px solid grey",
-                    px: 2,
-                  }}
-                  direction="row"
-                  key={user.id}
-                >
-                  {user.image ? (
-                    <img
-                      style={{ borderRadius: "50%" }}
-                      src={user.image}
-                      alt={user.name}
-                      width={50}
-                      height={50}
-                    />
-                  ) : (
-                    <Avatar sx={{width: 50, height: 50}} />
-                  )}
-                  <Typography variant="h5" sx={{ ml: 2, alignSelf: "center" }}>
-                    {user.name}
-                  </Typography>
-                </Stack>
-                </Link>
-              );
-            })}
-          <Fab onClick={refresh} color="primary" aria-label="Refresh" sx={{ 
+      <Fab onClick={refresh} color="primary" aria-label="Refresh" sx={{ 
             position: 'absolute',
             bottom: 16,
             right: 16,
             }}>
             <RefreshIcon style={refreshing ? rotate : {}} />
           </Fab>
+        <Stack sx={{overflowY: "scroll", overflowX: "hidden", maxHeight: height-100}}>
+        {recentMessages && recentMessages.length && <>
+        <Typography variant="h5" sx={{ml: 2}}>Recent:</Typography>
+      <RecentChatsList recentMessages={recentMessages || []} />      
+      <Divider />
+      </>}
+      <Typography variant="h5" sx={{ml: 2}}>All:</Typography>
+      <AllUsersList userList={userListWithoutMe} />
         </Stack>
     </Stack>
 

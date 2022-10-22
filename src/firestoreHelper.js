@@ -11,12 +11,14 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
 const USER_COLLECTION = "users";
 const CHAT_COLLECTION = "chats";
-
+const CHAT_COLLECTION_V2 = "messages";
+const MESSAGE_SECRET = "secretId"
 export const addUserToFirestore = async (user) => {
   try {
     const docRef = doc(db, USER_COLLECTION, user.uid);
@@ -61,7 +63,7 @@ export const getUserById = async (id) => {
     const userRef = doc(db, USER_COLLECTION, id);
     const docSnapshot = await getDoc(userRef);
       if (docSnapshot.exists()) {
-        return doc.data();
+        return docSnapshot.data();
       }
     return null
   } catch (error) {
@@ -75,9 +77,8 @@ export const getUser = async(id, userList=[]) => {
   if (!sender) {
     const u = await getUserById(id);
     return u;
-  } else {
-    return sender;
   }
+  return sender;
 }
 
 export const listenMsgChange = (id, onChange) => {
@@ -86,6 +87,33 @@ export const listenMsgChange = (id, onChange) => {
     const myQuery = query(chatRef, orderBy("createdAt", "asc"), limit(50));
     return onSnapshot(myQuery, onChange);
 
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+};
+export const listenMsgChangeV2 = (id, onChange) => {
+  try {
+    const chatRef = collection(db, CHAT_COLLECTION_V2);
+    const myQuery = query(chatRef, where(MESSAGE_SECRET, "==", id), orderBy("createdAt"));
+    const us = onSnapshot(myQuery, onChange,  e => {
+      console.error(e)
+    });
+    return us;
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+};
+
+export const listenForNewMessagesV2 = (uid, onChange) => {
+  try {
+    const chatRef = collection(db, CHAT_COLLECTION_V2);
+    const myQuery = query(chatRef, where("reciverId", "==", uid), orderBy("createdAt", "desc"), limit(10));
+    const us = onSnapshot(myQuery, onChange,  e => {
+      console.error(e)
+    });
+    return us;
   } catch (error) {
     console.error(error);
     return;
@@ -107,8 +135,26 @@ export const addFirebaseMessage = async(msg, combinedUID, sender, reciver) => {
   }
 }
 
+export const addFirebaseMessageV2 = async(msg, sender, reciver, id) => {
+  try {
+    await addDoc(collection(db, CHAT_COLLECTION_V2),  {
+      [MESSAGE_SECRET]: id,
+      message: msg,
+      sender,
+      reciver,
+      senderId: sender.id,
+      reciverId: reciver.id,
+      createdAt: Date.now(),
+    });
+    return {success: true}
+  } catch (error) {
+    console.error(error)
+    return {success: false}
+  }
+}
+
 export const logmeout = () => {
-  console.log("Logging out")
+  console.log("Logging out");
   const auth = getAuth();
   signOut(auth).then(() => {
     console.log("logout success");

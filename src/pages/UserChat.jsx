@@ -7,8 +7,10 @@ import ChatHeader from "../components/ChatHeader";
 import InputMessageRow from "../components/InputMessageRow";
 import {
   addFirebaseMessage,
+  addFirebaseMessageV2,
   getUser,
   listenMsgChange,
+  listenMsgChangeV2,
 } from "../firestoreHelper";
 import {
   decryptMsg,
@@ -42,9 +44,10 @@ export const UserChat = () => {
   useEffect(() => {
     if (encKey) {
       setMessages([]);
-      return listenMsgChange(combinedUUID, (snapshot) => {
+      let linsterFunc = listenMsgChangeV2;
+
+      return linsterFunc(combinedUUID, (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
-          // console.log(change)
           if (change.type === "added") {
             const obj = change.doc.data();
             const senderId = obj.sender.id;
@@ -57,7 +60,7 @@ export const UserChat = () => {
               sender,
               reciver,
               message,
-              createdAt: obj?.createdAt?.toDate() || new Date(),
+              createdAt: obj?.createdAt || new Date(),
             };
             updateHeight();
             setMessages((old) => {
@@ -84,9 +87,14 @@ export const UserChat = () => {
     }, 100);
   };
   const sendMessage = (msg) => {
-    encryptMsg(msg, encKey).then((encMsg) => {
-      addFirebaseMessage(encMsg, combinedUUID, me, user);
-    });
+    if (combinedUUID) {
+      encryptMsg(msg, encKey).then((encMsg) => {
+        // addFirebaseMessage(encMsg, combinedUUID, me, user);
+        addFirebaseMessageV2(encMsg, me, user, combinedUUID);
+      });
+    } else {
+      alert("Missing enc ID");
+    }
   };
   // console.log(messages);
 

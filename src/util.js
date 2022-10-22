@@ -38,3 +38,33 @@ export const encryptMsg = async (plainText, key) => {
 export const decryptMsg = (ciphertext, key) => {
     return CryptoJS.AES.decrypt(ciphertext, key).toString(CryptoJS.enc.Utf8);
 }
+
+function checkNotificationPromise() {
+  try {
+    Notification.requestPermission().then();
+  } catch (e) {
+    return false;
+  }
+
+  return true;
+}
+function handlePermission(permission) {
+  // set the button to shown or hidden, depending on what the user answers
+    if (Notification.permission === 'granted') {
+      console.log("allowed notification")
+    } else {
+      console.log("denied notification")
+    };
+}
+
+export const getNotificationPermission = async () => {
+  if (!('Notification' in window)) {
+    console.log("This browser does not support notifications.");
+  } else if (checkNotificationPromise()) {
+    const permission = await Notification.requestPermission();
+      handlePermission(permission);
+  } else {
+    const permission = await Notification.requestPermission;
+      handlePermission(permission);
+}
+}
