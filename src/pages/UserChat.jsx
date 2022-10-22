@@ -44,7 +44,7 @@ export const UserChat = () => {
       setMessages([]);
       return listenMsgChange(combinedUUID, (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
-          console.log(change)
+          // console.log(change)
           if (change.type === "added") {
             const obj = change.doc.data();
             const senderId = obj.sender.id;
@@ -57,7 +57,7 @@ export const UserChat = () => {
               sender,
               reciver,
               message,
-              createdAt: obj.createdAt,
+              createdAt: obj?.createdAt?.toDate() || new Date(),
             };
             updateHeight();
             setMessages((old) => {
@@ -66,7 +66,7 @@ export const UserChat = () => {
             });
           }
           if (change.type === "modified") {
-            console.log("Modified city: ", change.doc.data());
+            // console.log("Modified city: ", change.doc.data().reciver);
           }
           if (change.type === "removed") {
             // console.log("Removed city: ", change.doc.data());
@@ -107,7 +107,7 @@ export const UserChat = () => {
             <Chat
               key={msg.id}
               isMe={msg?.sender?.id === me?.id}
-              timestamp={msg?.createdAt?.toDate() || new Date()}
+              timestamp={msg?.createdAt || new Date()}
               message={msg.message || ""}
             />
           );

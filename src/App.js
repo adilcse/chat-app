@@ -63,7 +63,7 @@ const App = () => {
     let resp = () => {};
     if (user?.email) {
       resp = onChildAdded(chatListRef, (data) => {
-        // console.log(data.val())
+        console.log(data.val())
         setChats(chats=>[...chats,data.val()])
         setTimeout(()=>{
           updateHeight()

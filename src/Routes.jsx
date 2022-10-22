@@ -1,4 +1,4 @@
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,7 +8,7 @@ import {
   } from "react-router-dom";
 import App from './App'
 import { RequireAuth } from './components/RequireAuth';
-import { getUsersList } from './firestoreHelper';
+import { addUserToFirestore, getUsersList } from './firestoreHelper';
 import Login from './pages/Login'
 import { UserChat } from './pages/UserChat';
 import UsersList from './pages/UsersList';
@@ -22,13 +22,14 @@ const Routes = () => {
     useEffect(()=> {
         return onAuthStateChanged(auth, (user) => {
           if (user && !isLoggedIn) {
+             addUserToFirestore(user);
             dispatch(LoginAction({
                 name: user.displayName,
                 email: user.email,
                 id: user.uid,
                 image: user.photoURL,
             }));
-          } else if (!user){
+          } else {
             dispatch(LoginOutAction());
           }
         });
@@ -48,7 +49,10 @@ const Routes = () => {
         }
       }, [isLoggedIn]);
     if (isLoading) {
-        return <CircularProgress />
+        return (
+        <Stack sx={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+ <CircularProgress />
+        </Stack>)
     }
   return (
     <Switch>

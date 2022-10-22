@@ -104,6 +104,7 @@ const UsersList = () => {
                     height: "80px",
                     alignItems: "center",
                     borderBottom: "1px solid grey",
+                    px: 2,
                   }}
                   direction="row"
                   key={user.id}

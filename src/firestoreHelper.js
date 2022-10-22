@@ -1,10 +1,10 @@
-import { async } from "@firebase/util";
 import {
   addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
@@ -12,7 +12,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { digest } from "./util";
 
 const USER_COLLECTION = "users";
 const CHAT_COLLECTION = "chats";
@@ -29,6 +28,8 @@ export const addUserToFirestore = async (user) => {
         image: user.photoURL,
         createdAt: serverTimestamp(),
       });
+    } else {
+      console.log("user logged in: ", user)
     }
   } catch (error) {
     console.log(error.message);
@@ -81,7 +82,7 @@ export const getUser = async(id, userList=[]) => {
 export const listenMsgChange = (id, onChange) => {
   try {
     const chatRef = collection(db, CHAT_COLLECTION, id, "chats" );
-    const myQuery = query(chatRef, orderBy("createdAt", "asc"));
+    const myQuery = query(chatRef, orderBy("createdAt", "asc"), limit(50));
     return onSnapshot(myQuery, onChange);
 
   } catch (error) {

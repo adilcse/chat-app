@@ -37,11 +37,6 @@ const Login = () => {
 
     const googleLogin = () =>{
         signInWithPopup(auth, provider)
-        .then((result) => {
-            const user = result.user;
-            // addUserToRTD(user);
-            addUserToFirestore(user);
-        })
         .catch((error) => {
         const errorMessage = error.message;
         alert(errorMessage)
