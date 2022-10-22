@@ -15,11 +15,12 @@ import UsersList from './pages/UsersList';
 import { LoginAction, LoginOutAction, updateUsersListAction } from './redux/action/Action';
 
 const Routes = () => {
-  const auth = getAuth();
   const dispatch = useDispatch();
     const {isLoggedIn} = useSelector(state => state.AppReducer);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(()=> {
+      console.log("mounting")
+      const auth = getAuth();
         return onAuthStateChanged(auth, (user) => {
           if (user && !isLoggedIn) {
              addUserToFirestore(user);

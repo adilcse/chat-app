@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { CACHE_SIZE_UNLIMITED, enableIndexedDbPersistence, enableMultiTabIndexedDbPersistence, getFirestore, initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -15,6 +15,12 @@ const firebaseConfig = {
   const app = initializeApp(firebaseConfig);
 
   // Initialize Cloud Firestore and get a reference to the service
-  export const db = getFirestore(app);
+  export const db = initializeFirestore(app, {
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED
+  });
+  enableIndexedDbPersistence(db)
+  .catch((err) => {
+    console.error("error in caching", err);
+  });
   export const auth = getAuth(app);
 

@@ -22,9 +22,7 @@ const AppReducer = (state=defaultState, action={}) => {
             }
             case LOGOUT:
                 return {
-                    ...state,
-                    isLoggedIn: false,
-                    user: defaultState.user
+                    ...defaultState
                 }
             case UPDATE_USER_LIST:
                 return {

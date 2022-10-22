@@ -14,6 +14,7 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { getUsersList } from "../firestoreHelper";
 import { updateUsersListAction } from "../redux/action/Action";
+import UserProfileMenu from "../components/UserProfileMenu";
 const rotate = {
   transform: 'rotate(360deg)', 
   transition: 'transform 500ms ease', // smooth transition
@@ -28,8 +29,7 @@ const UsersList = () => {
     paddingBottom: theme.spacing(2),
     // Override media queries injected by theme.mixins.toolbar
     '@media all': {
-      minHeight: 80,
-      
+      minHeight: 50,
     },
   }));
 
@@ -69,15 +69,7 @@ const UsersList = () => {
                 <SearchIcon />
               </IconButton>
               
-              <IconButton
-                size="large"
-                aria-label="display more actions"
-                edge="end"
-                color="inherit"
-                sx={{display: 'flex', marginLeft :'auto'}}
-              >
-                <MoreIcon/>
-              </IconButton>
+              <UserProfileMenu user ={me}/>
             </StyledToolbar>
           </AppBar>
         </Box>
@@ -118,7 +110,7 @@ const UsersList = () => {
                       height={50}
                     />
                   ) : (
-                    <Avatar />
+                    <Avatar sx={{width: 50, height: 50}} />
                   )}
                   <Typography variant="h5" sx={{ ml: 2, alignSelf: "center" }}>
                     {user.name}

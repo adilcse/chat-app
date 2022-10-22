@@ -1,3 +1,4 @@
+import { getAuth, signOut } from "firebase/auth";
 import {
   addDoc,
   collection,
@@ -104,4 +105,15 @@ export const addFirebaseMessage = async(msg, combinedUID, sender, reciver) => {
     console.error(error)
     return {success: false}
   }
+}
+
+export const logmeout = () => {
+  console.log("Logging out")
+  const auth = getAuth();
+  signOut(auth).then(() => {
+    console.log("logout success");
+    // Sign-out successful.
+  }).catch((error) => {
+    // An error happened.
+  });
 }

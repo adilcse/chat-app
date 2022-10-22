@@ -8,7 +8,7 @@ const ChatHeader = ({user}) => {
     }
   return (
     <Stack direction="row" >
-      <Link to="/users" style={{margin: "auto 5px"}}>
+      <Link to="/" style={{margin: "auto 5px"}}>
         <Button sx={{alignSelf: "center", my: "auto"}}>
         <ArrowBackIcon/>
         </Button>
