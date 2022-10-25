@@ -1,5 +1,6 @@
 import { CircularProgress, Stack } from '@mui/material';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,7 +15,7 @@ import Login from './pages/Login'
 import { UserChat } from './pages/UserChat';
 import UsersList from './pages/UsersList';
 import { LoginAction, LoginOutAction, updateRecentMessageAction, updateUsersListAction } from './redux/action/Action';
-import { decryptMsg, getEncryptionKey } from './util';
+import { decryptMsg, getEncryptionKey, getNotificationPermission, showNotification } from './util';
 
 const Routes = () => {
   const auth = getAuth();
@@ -82,17 +83,43 @@ const Routes = () => {
       }, [isLoggedIn, user]);
 
       useEffect(()=> {
-        if (!isLoading &&  recentMessages.length) {
-          const lastMessage = recentMessages[0];
-          if(window.location.pathname !== '/' && lastMessage?.message && lastMessage.sender?.id && !window.location.pathname.includes(lastMessage.sender?.id)) {
-            const myNotify = new Notification('New Message from ' + lastMessage.sender?.name, { body: lastMessage.message?.length>20 ?
-              lastMessage.message.substring(0, 20) :lastMessage.message , icon: lastMessage.sender.image }
-              );
-            myNotify.onclick = (e) => {
-              history.push("/chat/"+ lastMessage.sender?.id);
+        const sendNotification = () => {
+          try {
+            if (!isLoading &&  recentMessages.length) {
+              const lastMessage = recentMessages[0];
+              if(window.location.pathname !== '/' && lastMessage?.message && lastMessage.sender?.id && !window.location.pathname.includes(lastMessage.sender?.id)) {
+                const msg = lastMessage.message?.length>20 ? lastMessage.message.substring(0, 20) :lastMessage.message
+                getNotificationPermission().then((status) => {
+                  if (status) {
+                    try {
+                      // throw new Error ("e")
+                    const myNotify = new Notification('New Message from ' + lastMessage.sender?.name, {
+                      body: msg , icon: lastMessage.sender.image })
+                      console.log("notifying");
+                      myNotify.onclick = (e) => {
+                        history.push("/chat/"+ lastMessage.sender?.id);
+                      }
+                    } catch (e) {
+                      showNotification(
+                        'New Message from ' + lastMessage.sender?.name,
+                        lastMessage.sender.image,
+                        msg,
+                        lastMessage.sender?.id
+                      )
+                    }
+                  } else {
+                    console.log(" can not send notification");
+                  }
+                });
+              }
             }
+          } catch (e) {
+            console.log(e);
           }
         }
+        const deb = debounce(sendNotification, 500);
+        deb();
+        return deb.cancel;
       }, [isLoading, recentMessages])
     if (isLoading) {
         return (

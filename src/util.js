@@ -48,12 +48,12 @@ function checkNotificationPromise() {
 
   return true;
 }
-function handlePermission(permission) {
+function handlePermission() {
   // set the button to shown or hidden, depending on what the user answers
     if (Notification.permission === 'granted') {
-      console.log("allowed notification")
+      return true;
     } else {
-      console.log("denied notification")
+      return false;
     };
 }
 
@@ -61,10 +61,21 @@ export const getNotificationPermission = async () => {
   if (!('Notification' in window)) {
     console.log("This browser does not support notifications.");
   } else if (checkNotificationPromise()) {
-    const permission = await Notification.requestPermission();
-      handlePermission(permission);
+    await Notification.requestPermission();
+      return handlePermission();
   } else {
-    const permission = await Notification.requestPermission;
-      handlePermission(permission);
+    return handlePermission();
 }
+}
+
+export const showNotification = (title, image, msg, id) => {
+    navigator.serviceWorker.ready.then((registration) => {
+    console.log("notifying: ", msg);
+      registration.showNotification(title, {
+        body: msg,
+        icon: image,
+        vibrate: [200, 100, 200, 100, 200, 100, 200],
+        tag: id,
+      });
+    });
 }

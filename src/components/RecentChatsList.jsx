@@ -31,10 +31,11 @@ const RecentChatsList = ({recentMessages}) => {
     {msgList
             .map((msg) => {
               return (
-                <Link key={msg?.sender?.id || msg.createdAt} to={"/chat/"+msg?.sender?.id}>
+                <Link style={{maxWidth: "90%"}} key={msg?.sender?.id || msg.createdAt} to={"/chat/"+msg?.sender?.id}>
                 <Stack
                   sx={{
                     width: "100%",
+                    maxWidth: "90%",
                     height: "80px",
                     alignItems: "center",
                     borderBottom: "1px solid grey",

@@ -10,18 +10,22 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { getNotificationPermission } from './util';
+import withClearCache from './ClearCache';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+const MyApp = () => (
   <React.StrictMode>
-    <Provider store={store}>
-  <PersistGate loading={<>loading</>} persistor={persistor}>
-     <Router>
-     <Routes />
-     </Router>
-     </PersistGate>
-     </Provider>
-  </React.StrictMode>
-);
+  <Provider store={store}>
+<PersistGate loading={<>loading</>} persistor={persistor}>
+   <Router>
+   <Routes />
+   </Router>
+   </PersistGate>
+   </Provider>
+</React.StrictMode>
+)
+const Component = withClearCache(MyApp)
+root.render(<Component/>);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
