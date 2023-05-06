@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { CACHE_SIZE_UNLIMITED, enableIndexedDbPersistence, enableMultiTabIndexedDbPersistence, getFirestore, initializeFirestore } from "firebase/firestore";
+import { CACHE_SIZE_UNLIMITED, enableIndexedDbPersistence, initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object

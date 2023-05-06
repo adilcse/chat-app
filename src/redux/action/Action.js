@@ -1,4 +1,4 @@
-import { LOGIN, LOGOUT, RECENT_MSSAGES, UPDATE_USER_LIST } from "../constants"
+import { LOGIN, LOGOUT, RECENT_MSSAGES, UPDATE_USER_LIST, ADD_RECENT_MSSAGES } from "../constants"
 
 export const LoginAction = (value) => {
     return {
@@ -26,3 +26,9 @@ export const updateRecentMessageAction = (value) => {
     }
 }
  
+export const AddRecentMessageAction = (value) => {
+    return {
+        type: ADD_RECENT_MSSAGES,
+        payload: value
+    }
+}

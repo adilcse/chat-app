@@ -1,9 +1,8 @@
-import {  Stack } from '@mui/material'
+import { Stack } from '@mui/material'
 import React from 'react'
-import { Link } from 'react-router-dom';
 import UserRow from './UserRow';
 
-const AllUsersList = ({userList}) => {
+const SearchList = ({ user: me, userList, onAddClick, onMessage }) => {
   return (
     <Stack
     direction="column"
@@ -19,13 +18,11 @@ const AllUsersList = ({userList}) => {
     {userList
             .map((user) => {
               return (
-                <Link key={user.id} to={"/chat/"+user.id}>
-                  <UserRow user={user}/>
-                </Link>
+                  <UserRow key={user.id} user={{...user, alreadyExist: !!me?.contacts?.includes(user.id)}} onAdd={onAddClick} onMessage={onMessage}/>
               );
             })}
     </Stack>
   )
 }
 
-export default AllUsersList
+export default SearchList

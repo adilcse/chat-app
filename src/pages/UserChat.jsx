@@ -1,32 +1,41 @@
 import { Stack } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Chat from "../components/Chat";
 import ChatHeader from "../components/ChatHeader";
 import InputMessageRow from "../components/InputMessageRow";
 import {
-  addFirebaseMessage,
   addFirebaseMessageV2,
-  getUser,
-  listenMsgChange,
+  getUserById,
   listenMsgChangeV2,
+  setMessageAsSeen,
 } from "../firestoreHelper";
 import {
-  decryptMsg,
+  decodeAndGetMessage,
   encryptMsg,
   getCombinedUUID,
   getEncryptionKey,
 } from "../util";
+import { updateUsersListAction } from "../redux/action/Action";
 
 export const UserChat = () => {
   const [combinedUUID, setcombinedUUID] = useState("");
   const [encKey, setEncKey] = useState("");
   const [messages, setMessages] = useState([]);
   const { user: me, userList } = useSelector((state) => state.AppReducer);
+  const dispatch = useDispatch();
   const param = useParams();
   const user = useMemo(
-    () => userList.find((u) => u.id === param?.uid),
+    () => {
+      const u = userList.find((u) => u.id === param?.uid);
+      if (!u) {
+        getUserById(param?.uid).then(newUser => {
+          dispatch(updateUsersListAction([newUser, ...userList]))
+        })
+      }
+      return u;
+    },
     [userList, param?.uid]
   );
 
@@ -50,26 +59,24 @@ export const UserChat = () => {
         snapshot.docChanges().forEach(async (change) => {
           if (change.type === "added") {
             const obj = change.doc.data();
-            const senderId = obj.sender.id;
-            const reciverId = obj.reciver.id;
-            const sender = await getUser(senderId, userList);
-            const reciver = await getUser(reciverId, userList);
-            const message = decryptMsg(obj.message, encKey);
-            const myMsg = {
-              id: change.doc.id,
-              sender,
-              reciver,
-              message,
-              createdAt: obj?.createdAt || new Date(),
-            };
+            const myMsg = await decodeAndGetMessage(obj, change.doc.id, userList, encKey);
             updateHeight();
             setMessages((old) => {
-              const newMSgs = [...old, myMsg];
+              const newMSgs = [...old, myMsg].sort((a,b) => a.createdAt - b.createdAt);
               return newMSgs;
             });
           }
           if (change.type === "modified") {
-            // console.log("Modified city: ", change.doc.data().reciver);
+            const myMsg = await decodeAndGetMessage(change.doc.data(), change.doc.id, userList, encKey);
+            setMessages((old) => {
+              const newMSgs = old.map(item => {
+                if (item.id === myMsg.id) {
+                  return myMsg;
+                }
+                return item;
+              });
+              return newMSgs;
+            });
           }
           if (change.type === "removed") {
             // console.log("Removed city: ", change.doc.data());
@@ -78,6 +85,17 @@ export const UserChat = () => {
       });
     }
   }, [encKey, combinedUUID]);
+
+  useEffect(()=> {
+    messages.forEach(msg => {
+      if (msg?.sender?.id !== me?.id) {
+        if (!msg.seen) {
+          setMessageAsSeen(msg);
+        }
+      }
+    })
+  }, [messages]);
+
   const updateHeight = () => {
     setTimeout(() => {
       const el = document.getElementById("chat");
@@ -117,6 +135,7 @@ export const UserChat = () => {
               isMe={msg?.sender?.id === me?.id}
               timestamp={msg?.createdAt || new Date()}
               message={msg.message || ""}
+              seen={!!msg.seen}
             />
           );
         })}

@@ -12,6 +12,10 @@ import {
   serverTimestamp,
   setDoc,
   where,
+  FieldValue,
+  arrayUnion,
+  updateDoc,
+  arrayRemove
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -30,6 +34,7 @@ export const addUserToFirestore = async (user) => {
         id: user.uid,
         image: user.photoURL,
         createdAt: serverTimestamp(),
+        contacts: []
       });
     } else {
       console.log("user logged in: ", user)
@@ -39,10 +44,31 @@ export const addUserToFirestore = async (user) => {
   }
 };
 
-export const getUsersList = async () => {
+export const getUsersList = async (user) => {
   try {
     const userRef = collection(db, USER_COLLECTION);
-    const myQuery = query(userRef, orderBy("name", "asc"));
+    const myQuery = query(userRef, where("id", "in" , user.contacts || []), orderBy("name", "asc"));
+    const querySnapshot = await getDocs(myQuery);
+
+    const users = [];
+    querySnapshot.forEach((doc) => {
+      if (doc.exists()) {
+        users.push(doc.data());
+      }
+    });
+    return users;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const searchUsersList = async (field, text = "") => {
+  try {
+    text = text.toLowerCase();
+    const end = text.replace(/.$/, c => String.fromCharCode(c.charCodeAt(0) + 1));
+    const userRef = collection(db, USER_COLLECTION);
+    const myQuery = query(userRef, where(field, ">=", text), where(field, "<", end),  orderBy(field, "asc"), limit(20));
     const querySnapshot = await getDocs(myQuery);
 
     const users = [];
@@ -153,6 +179,33 @@ export const addFirebaseMessageV2 = async(msg, sender, reciver, id) => {
   }
 }
 
+export const addFirebaseUserContact = async(me, userId) => {
+  try {
+    const docRef = doc(db, USER_COLLECTION, me.id);
+    if (me.contacts && me.contacts.includes(userId)) {
+      await updateDoc(docRef, {
+        contacts: arrayRemove(userId)
+      });
+      me.contacts = me.contacts.filter(id=> id!==userId);
+      return {success: true, data: me}
+    }
+    if (!me.contacts) {
+      await updateDoc(docRef, {
+        contacts: [userId]
+      });
+      me.contacts = [userId]
+    } else {
+      await updateDoc(docRef, {
+        contacts: arrayUnion(userId)
+      });
+      me.contacts.push(userId)
+    }
+    return {success: true, data: me}
+  } catch (error) {
+    console.error(error)
+    return {success: false, data: me}
+  }
+}
 export const logmeout = () => {
   console.log("Logging out");
   const auth = getAuth();
@@ -162,4 +215,16 @@ export const logmeout = () => {
   }).catch((error) => {
     // An error happened.
   });
+}
+
+export const setMessageAsSeen = async(message) => {
+  try {
+    await updateDoc(doc(db, CHAT_COLLECTION_V2, message.id),  {
+      seen: true
+    });
+    return {success: true}
+  } catch (error) {
+    console.error(error)
+    return {success: false}
+  }
 }

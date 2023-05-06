@@ -1,4 +1,5 @@
 import CryptoJS  from "crypto-js";
+import { getUser } from "./firestoreHelper";
 export const digest = async (message, algorithm = "SHA-256") =>
   Array.prototype.map
     .call(
@@ -78,4 +79,27 @@ export const showNotification = (title, image, msg, id) => {
         tag: id,
       });
     });
+}
+
+export const sleep = (delay = 0) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+};
+
+
+export const decodeAndGetMessage = async(obj, id, userList, encKey) => {
+  const senderId = obj.sender.id;
+  const reciverId = obj.reciver.id;
+  const sender = await getUser(senderId, userList);
+  const reciver = await getUser(reciverId, userList);
+  const message = decryptMsg(obj.message, encKey);
+  return {
+    ...obj,
+    id,
+    sender,
+    reciver,
+    message,
+    createdAt: obj?.createdAt || new Date(),
+  };
 }

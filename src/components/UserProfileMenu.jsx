@@ -12,6 +12,9 @@ const UserProfileMenu = ({user}) => {
     const handleClose = () => {
       setAnchorEl(null);
     };
+    if (!user) {
+      return null
+    }
   return (
     <>
     <Tooltip title="Account settings">

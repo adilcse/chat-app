@@ -17,35 +17,11 @@ const chatGroup = "chat1";
 const App = () => {
 
 
-
-  const provider = new GoogleAuthProvider();
   const auth = getAuth();
   // const [user, setUser] = useState({name: "", email: ""});
   const [chats, setChats] = useState([]);
   const [msg, setMsg] = useState('');
   const {user} = useSelector(state => state.AppReducer);
-  // const googleLogin = () =>{
-  //   signInWithPopup(auth, provider)
-  // .then((result) => {
-  //   // This gives you a Google Access Token. You can use it to access the Google API.
-  //   const credential = GoogleAuthProvider.credentialFromResult(result);
-  //   const token = credential.accessToken;
-  //   // The signed-in user info.
-  //   const user = result.user;
-  //   setUser({name:user.displayName, email: user.email})
-  //   console.log(token, user);
-
-  // }).catch((error) => {
-  //   // Handle Errors here.
-  //   const errorCode = error.code;
-  //   const errorMessage = error.message;
-  //   // The email of the user's account used.
-  //   const email = error.email;
-  //   // The AuthCredential type that was used.
-  //   const credential = GoogleAuthProvider.credentialFromError(error);
-  //   // ...
-  // });
-  // }
 
   const db = getDatabase();
   const chatListRef = ref(db, 'chats');

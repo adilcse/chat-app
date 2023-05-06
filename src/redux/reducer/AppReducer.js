@@ -1,4 +1,4 @@
-import { LOGIN, LOGOUT, RECENT_MSSAGES, UPDATE_USER_LIST } from "../constants"
+import { ADD_RECENT_MSSAGES, LOGIN, LOGOUT, RECENT_MSSAGES, UPDATE_USER_LIST } from "../constants"
 
 const defaultState = {
     user: {
@@ -35,6 +35,11 @@ const AppReducer = (state=defaultState, action={}) => {
                     ...state,
                     recentMessages: [action.payload, ...state.recentMessages].sort((a,b) => b.createdAt - a.createdAt)
                 }
+                case ADD_RECENT_MSSAGES:
+                    return {
+                        ...state,
+                        recentMessages: action.payload?.sort((a,b) => b.createdAt - a.createdAt)
+                    }
         default:
             return {...state}
     }

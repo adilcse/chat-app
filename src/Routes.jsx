@@ -14,8 +14,10 @@ import { addUserToFirestore, getUser, getUsersList, listenForNewMessagesV2 } fro
 import Login from './pages/Login'
 import { UserChat } from './pages/UserChat';
 import UsersList from './pages/UsersList';
-import { LoginAction, LoginOutAction, updateRecentMessageAction, updateUsersListAction } from './redux/action/Action';
+import { AddRecentMessageAction, LoginAction, LoginOutAction, updateUsersListAction } from './redux/action/Action';
 import { decryptMsg, getEncryptionKey, getNotificationPermission, showNotification } from './util';
+import AddContact from './pages/AddContact';
+import { getUserById } from './firestoreHelper';
 
 const Routes = () => {
   const auth = getAuth();
@@ -33,15 +35,11 @@ const Routes = () => {
 
     
     useEffect(()=> {
-        return onAuthStateChanged(auth, (user) => {
+        return onAuthStateChanged(auth, async(user) => {
           if (user) {
-             addUserToFirestore(user);
-            dispatch(LoginAction({
-                name: user.displayName,
-                email: user.email,
-                id: user.uid,
-                image: user.photoURL,
-            }));
+            await addUserToFirestore(user);
+            const dbUser = await getUserById(user.uid)
+            dispatch(LoginAction(dbUser));
           } else {
             dispatch(LoginOutAction());
           }
@@ -50,7 +48,7 @@ const Routes = () => {
     
       useEffect(() => {
         if (isLoggedIn) {
-          getUsersList().then((u) => {
+          getUsersList(user).then((u) => {
             dispatch(updateUsersListAction(u))
           });
         }
@@ -58,8 +56,9 @@ const Routes = () => {
 
       useEffect(() => {
         if (isLoggedIn && user) {
-          dispatch(updateRecentMessageAction([]));
+          dispatch(AddRecentMessageAction([]));
           return listenForNewMessagesV2( user.id, snapshot => {
+            const messages = [];
             snapshot.docChanges().forEach(async (change) => {
               if (change.type === "added") {
                 const obj = change.doc.data();
@@ -76,8 +75,12 @@ const Routes = () => {
                   message,
                   createdAt: obj?.createdAt || new Date(),
                 };
-                dispatch(updateRecentMessageAction(myMsg));
-              }})
+                messages.push(myMsg)
+              }});
+              setTimeout(() => {
+                console.log(messages)
+                dispatch(AddRecentMessageAction(messages));
+              }, 1000);
           })
         }
       }, [isLoggedIn, user]);
@@ -145,6 +148,11 @@ const Routes = () => {
         <Route exact path="/asif">
         <RequireAuth>
             <App/>
+        </RequireAuth>
+        </Route>
+        <Route exact path="/addcontact">
+        <RequireAuth>
+            <AddContact/>
         </RequireAuth>
         </Route>
         <Route exact path="/">
