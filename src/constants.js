@@ -1,0 +1,1 @@
+export const REFRESH_LOCATION_LIMIT = 100;

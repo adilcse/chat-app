@@ -3,7 +3,7 @@ import SendIcon from '@mui/icons-material/Send';
 import React, { useState } from 'react';
 
 
-const InputMessageRow = ({sendMessage, scroll}) => {
+const InputMessageRow = ({sendMessage, scroll, disabled=false}) => {
   const [msg, setMsg] = useState("");
   const sendChat = () => {
     if (msg && msg.trim()) {
@@ -21,6 +21,7 @@ const InputMessageRow = ({sendMessage, scroll}) => {
               <InputBase
                onInput={(e) => setMsg(e.target.value)}
                onFocus={scroll}
+               disabled={disabled}
                onKeyUp={e => {
                 if (e.key === "Enter") {
                   sendChat()

@@ -10,20 +10,25 @@ import {
   } from "react-router-dom";
 import App from './App'
 import { RequireAuth } from './components/RequireAuth';
-import { addUserToFirestore, getUser, getUsersList, listenForNewMessagesV2 } from './firestoreHelper';
+import { addUserToFirestore, getNearbyThreads, getUser, getUsersList, listenForNewMessagesV2, updateFirebaseUserLocation } from './firestoreHelper';
 import Login from './pages/Login'
 import { UserChat } from './pages/UserChat';
 import UsersList from './pages/UsersList';
-import { AddRecentMessageAction, LoginAction, LoginOutAction, updateUsersListAction } from './redux/action/Action';
+import { AddRecentMessageAction, LoginAction, LoginOutAction, UpdateLocationAction, UpdateNearbyThreads, updateUsersListAction } from './redux/action/Action';
 import { decryptMsg, getEncryptionKey, getNotificationPermission, showNotification } from './util';
 import AddContact from './pages/AddContact';
+import NearMe from './pages/NearMe';
 import { getUserById } from './firestoreHelper';
+import { calculateDistance } from './utils/locationHelper';
+import { REFRESH_LOCATION_LIMIT } from './constants';
+import { geohashForLocation } from 'geofire-common';
+import { ThreadChat } from './pages/ThreadChat';
 
 const Routes = () => {
   const auth = getAuth();
   const dispatch = useDispatch();
   const history = useHistory();
-    const {isLoggedIn, userList, user, recentMessages} = useSelector(state => state.AppReducer);
+    const {isLoggedIn, userList, user, location, recentMessages, threadRefresh} = useSelector(state => state.AppReducer);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(()=> {
       const id = setTimeout(()=> {
@@ -32,13 +37,53 @@ const Routes = () => {
      }, 3000);
      return () => clearTimeout(id)
     }, []);
+    useEffect(() => {
+      console.log("refreshing threads", threadRefresh);
+        const getThreads = async () => {
+            if (user.id && location.geoHash) {
+                const threads = await getNearbyThreads(user, location);
+                console.log({threads});
+               dispatch( UpdateNearbyThreads(threads));
+            }
+        }
+        getThreads();
+    }, [location, user, threadRefresh]);
 
-    
+    useEffect(()=> {
+      const watchLocation = () => {
+        if (!navigator.geolocation) {
+          console.error('Geolocation is not supported by your browser');
+          return;
+        }
+        const success = (position) => {
+          const newLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          const geoHash = geohashForLocation([newLocation.latitude, newLocation.longitude], 20);
+          newLocation.geoHash = geoHash;
+          if (user?.id && calculateDistance(location?.latitude, location?.longitude, newLocation.latitude, newLocation.longitude) > REFRESH_LOCATION_LIMIT) {
+            dispatch(UpdateLocationAction(newLocation));
+            updateFirebaseUserLocation(user, newLocation);
+          };
+        };
+        const failure = (error) => {
+          console.error("not able to get location", error);
+        };
+        const watchId = navigator.geolocation.watchPosition(success, failure);
+        return () => {
+          navigator.geolocation.clearWatch(watchId);
+        };
+      }
+  console.log(user);
+      return watchLocation();
+  }, [user, location]);
     useEffect(()=> {
         return onAuthStateChanged(auth, async(user) => {
           if (user) {
             await addUserToFirestore(user);
-            const dbUser = await getUserById(user.uid)
+            const dbUser = await getUserById(user.uid);
+            console.log({dbUser});
             dispatch(LoginAction(dbUser));
           } else {
             dispatch(LoginOutAction());
@@ -145,6 +190,11 @@ const Routes = () => {
                 <UserChat/>
             </RequireAuth>
         </Route>
+        <Route path="/thread/:uid">
+            <RequireAuth>
+                <ThreadChat/>
+            </RequireAuth>
+        </Route>
         <Route exact path="/asif">
         <RequireAuth>
             <App/>
@@ -153,6 +203,11 @@ const Routes = () => {
         <Route exact path="/addcontact">
         <RequireAuth>
             <AddContact/>
+        </RequireAuth>
+        </Route>
+        <Route exact path="/nearme">
+        <RequireAuth>
+            <NearMe/>
         </RequireAuth>
         </Route>
         <Route exact path="/">

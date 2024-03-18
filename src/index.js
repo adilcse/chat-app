@@ -14,7 +14,6 @@ import withClearCache from './ClearCache';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const MyApp = () => (
-  <React.StrictMode>
   <Provider store={store}>
 <PersistGate loading={<>loading</>} persistor={persistor}>
    <Router>
@@ -22,7 +21,6 @@ const MyApp = () => (
    </Router>
    </PersistGate>
    </Provider>
-</React.StrictMode>
 )
 const Component = withClearCache(MyApp)
 root.render(<Component/>);

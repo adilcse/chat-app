@@ -13,6 +13,7 @@ export const digest = async (message, algorithm = "SHA-256") =>
     export const getCombinedUUID = (sender, reciver) => {
         return digest([sender.id, reciver.id].sort().join("-"));
     }
+
 export const getKey = (sender, reciver) => {
     return [sender, reciver].sort((a, b) => {
         if ( a.id < b.id ){
@@ -99,6 +100,18 @@ export const decodeAndGetMessage = async(obj, id, userList, encKey) => {
     id,
     sender,
     reciver,
+    message,
+    createdAt: obj?.createdAt || new Date(),
+  };
+}
+
+export const decodeAndGetThreadMessage = async(obj, id, userList, encKey) => {
+  const sender = await getUser(obj.senderId, userList);
+  const message = decryptMsg(obj.message, encKey);
+  return {
+    ...obj,
+    id,
+    sender,
     message,
     createdAt: obj?.createdAt || new Date(),
   };

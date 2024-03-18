@@ -1,6 +1,6 @@
 {
   "name": "Chatcwithchat2",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",
@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "crypto-js": "^4.1.1",
     "firebase": "^9.12.1",
+    "geofire-common": "^6.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "react": "^18.2.0",
@@ -22,6 +23,7 @@
     "redux": "^4.2.0",
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
+    "uuid": "^9.0.1",
     "web-vitals": "^2.1.4",
     "workbox-background-sync": "^6.5.4",
     "workbox-broadcast-update": "^6.5.4",
@@ -61,5 +63,5 @@
       "last 1 safari version"
     ]
   },
-  "buildDate": 1666542160573
+  "buildDate": 1710714973303
 }
